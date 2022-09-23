@@ -3,8 +3,7 @@ const dotenv = require('dotenv')
 const routes = require('./routes')
 const mongoose = require('mongoose')
 const bodyParser = require('body-parser')
-const loggerMiddleware = require('./middlewares/logger')
-const corsMiddleware = require('./middlewares/cors')
+const middlewares = require('./middlewares/middlewares')
 
 require('./db/mongodb')
 
@@ -17,15 +16,13 @@ mongoose.connect(MONGODB_URL, {
 
 const app = express()
 
-app.use(corsMiddleware)
+app.use(middlewares)
 app.use(bodyParser.json())
-app.use(loggerMiddleware)
-
 app.use('/', routes)
 
 app.use((err, req, res, next) => {
-    const isNotFound = ~err.message.indexOf('not found')
-    const isCastError = ~err.message.indexOf('Cast to ObjectId failed')
+    const isNotFound = err.message.indexOf('not found')
+    const isCastError = err.message.indexOf('Cast to ObjectId failed')
     if (err.message && (isNotFound || isCastError)) {
         return next()
     }
